@@ -1,0 +1,29 @@
+@import "preline/variants.css";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+:root {
+  --background: 0 0% 100%;
+  --foreground: 220 60% 20%;
+  --accent: 215 85% 45%;
+  --card: 210 35% 98%;
+}
+
+.dark {
+  --background: 220 35% 10%;
+  --foreground: 210 40% 95%;
+  --accent: 215 90% 60%;
+  --card: 220 30% 18%;
+}
+
+body {
+  color: hsl(var(--foreground));
+  background-color: hsl(var(--background));
+}
