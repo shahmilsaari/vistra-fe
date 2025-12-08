@@ -10,9 +10,10 @@ type ModalProps = {
   title: string;
   children: ReactNode;
   footer?: ReactNode;
+  maxWidth?: string;
 };
 
-export function Modal({ isOpen, onClose, title, children, footer }: ModalProps) {
+export function Modal({ isOpen, onClose, title, children, footer, maxWidth = "max-w-3xl" }: ModalProps) {
   useEffect(() => {
     function handleEsc(event: KeyboardEvent) {
       if (event.key === "Escape") onClose();
@@ -36,7 +37,7 @@ export function Modal({ isOpen, onClose, title, children, footer }: ModalProps) 
   return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       <div className="absolute inset-0 bg-slate-900/70 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative z-10 m-4 w-full max-w-3xl rounded-2xl border border-gray-200 bg-white shadow-2xl dark:border-neutral-700 dark:bg-neutral-900">
+      <div className={`relative z-10 m-4 w-full ${maxWidth} rounded-2xl border border-gray-200 bg-white shadow-2xl dark:border-neutral-700 dark:bg-neutral-900`}>
         <div className="flex items-center justify-between border-b border-gray-200 px-4 py-3 dark:border-neutral-700">
           <h3 className="text-lg font-bold text-gray-900 dark:text-white">{title}</h3>
           <button

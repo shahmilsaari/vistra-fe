@@ -9,8 +9,10 @@ import "filepond/dist/filepond.min.css";
 import "filepond-plugin-image-preview/dist/filepond-plugin-image-preview.css";
 import "filepond-plugin-file-poster/dist/filepond-plugin-file-poster.css";
 
+type FileUploadEntry = FilePondInitialFile | FilePondFile | string;
+
 type FileUploadProps = {
-  files: FilePondInitialFile[];
+  files: FileUploadEntry[];
   onUpdateFiles: (files: FilePondFile[]) => void;
   label?: ReactNode;
   options?: FilePondOptions;
@@ -31,10 +33,12 @@ const formatBytes = (bytes: number) => {
 
 export function FileUpload({ files, onUpdateFiles, label, options }: FileUploadProps) {
   const namesRef = useRef<Set<string>>(new Set());
-  const totalSize = files.reduce(
-    (sum, file) => sum + ((typeof file === "string" ? 0 : (file as FilePondInitialFile).file?.size ?? 0)),
-    0
-  );
+  const totalSize = files.reduce((sum, file) => {
+    if (typeof file === "string") {
+      return sum;
+    }
+    return sum + (file?.file?.size ?? 0);
+  }, 0);
 
   const totalLabel = totalSize > 0 ? `${Math.round(totalSize / 1024)} KB` : "0 KB";
 
@@ -44,10 +48,10 @@ export function FileUpload({ files, onUpdateFiles, label, options }: FileUploadP
       if (!entry) return;
       if (typeof entry === "string") {
         current.add(entry);
-      } else {
-        const name = (entry as FilePondInitialFile).file?.name ?? entry.source?.toString() ?? "";
-        if (name) current.add(name);
+        return;
       }
+      const name = entry.file?.name ?? (entry as FilePondInitialFile).source?.toString() ?? "";
+      if (name) current.add(name);
     });
     namesRef.current = current;
   }, [files]);
@@ -121,7 +125,7 @@ export function FileUpload({ files, onUpdateFiles, label, options }: FileUploadP
                   beforeAddFile={handleBeforeAddFile}
                   fileRenameFunction={(file) => {
                     const existing = files.map((f) =>
-                      typeof f === "string" ? f : (f as FilePondInitialFile).file?.name ?? ""
+                      typeof f === "string" ? f : f.file?.name ?? ""
                     );
                     if (!existing.includes(file.name)) {
                       return file.name;
@@ -161,8 +165,8 @@ export function FileUpload({ files, onUpdateFiles, label, options }: FileUploadP
 
               <div className="space-y-2">
                 {files.map((file, index) => {
-                  const name = typeof file === "string" ? file : (file as FilePondInitialFile).file?.name ?? "Unknown";
-                  const size = typeof file === "string" ? 0 : (file as FilePondInitialFile).file?.size ?? 0;
+                  const name = typeof file === "string" ? file : file.file?.name ?? "Unknown";
+                  const size = typeof file === "string" ? 0 : file.file?.size ?? 0;
                   return (
                     <div
                       key={`${name}-${size}-${index}`}
@@ -202,4 +206,4 @@ export function FileUpload({ files, onUpdateFiles, label, options }: FileUploadP
   );
 }
 
-export type { FileUploadProps };
+export type { FileUploadProps, FileUploadEntry };

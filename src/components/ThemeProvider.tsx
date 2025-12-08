@@ -25,7 +25,7 @@ export function ThemeProvider({ children }: Props) {
   }, []);
 
   return (
-    <NextThemeProvider attribute="class" defaultTheme="dark" enableSystem>
+    <NextThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
       {children}
     </NextThemeProvider>
   );

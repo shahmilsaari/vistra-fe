@@ -4,6 +4,7 @@ export type TableColumn<T extends Record<string, unknown>> = {
   key: keyof T;
   header: string;
   sortable?: boolean;
+  sortField?: string;
   render?: (row: T) => ReactNode;
   className?: string;
   hideable?: boolean;

@@ -1,6 +1,6 @@
 "use client";
 
-import type { DataTableProps, MultiSelectOption } from "@/components/ui";
+import { FileIcon, type DataTableProps } from "@/components/ui";
 
 export type DocumentItem = {
   id: number;
@@ -9,32 +9,26 @@ export type DocumentItem = {
   date: string;
   size: string;
   kind: "folder" | "file";
+  path?: string;
 };
 
 const renderNameCell = (row: DocumentItem) => {
   const iconColor = row.kind === "folder" ? "text-amber-500 dark:text-amber-400" : "text-sky-500 dark:text-sky-400";
-  const iconPath =
-    row.kind === "folder"
-      ? "M3 7h5l2 2h11a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h4l2 2h8"
-      : "M6 3h8l5 5v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z";
 
   return (
-    <div className="flex items-center gap-3">
-      <span className={`grid h-9 w-9 place-items-center rounded-xl border border-slate-200 bg-slate-50 dark:border-neutral-700 dark:bg-neutral-900 ${iconColor}`}>
-        <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d={iconPath} />
-          {row.kind === "file" && <path d="M14 3v5h5" />}
-        </svg>
+    <div className="flex w-full items-center gap-3">
+      <span className={`flex h-10 w-10 items-center justify-center rounded-xl border border-neutral-200 bg-white shadow-inner dark:border-neutral-700 dark:bg-neutral-900 ${iconColor}`}>
+        <FileIcon kind={row.kind} name={row.name} className="h-5 w-5" />
       </span>
-      <span className="text-sm font-semibold text-gray-900 dark:text-neutral-100">{row.name}</span>
+      <span className="min-w-0 text-sm font-medium text-neutral-900 dark:text-neutral-100">{row.name}</span>
     </div>
   );
 };
 
 export const documents: DocumentItem[] = [
-  { id: 1, name: "Appointment resolutions", createdBy: "John Green", date: "12 Apr 2024", size: "-", kind: "folder" },
-  { id: 2, name: "Policy approvals", createdBy: "John Green", date: "12 Apr 2024", size: "-", kind: "folder" },
-  { id: 3, name: "2025_01_15_Director_Appointment_Resolution.pdf", createdBy: "John Green", date: "12 Apr 2024", size: "1 KB", kind: "file" },
+  { id: 1, name: "Appointment resolutions", createdBy: "John Green", date: "12 Apr 2024", size: "-", kind: "folder", path: "/documents/policies" },
+  { id: 2, name: "Policy approvals", createdBy: "John Green", date: "12 Apr 2024", size: "-", kind: "folder", path: "/documents/approvals" },
+  { id: 3, name: "2025_01_15_Director_Appointment_Resolution.pdf", createdBy: "John Green", date: "12 Apr 2024", size: "1 KB", kind: "file", path: "/documents/2025" },
   { id: 4, name: "2024_12_10_Dividend_Declaration_Resolution.docx", createdBy: "John Green", date: "12 Apr 2024", size: "1 KB", kind: "file" },
   { id: 5, name: "2023_08_05_Investment_Policy_Approval.pdf", createdBy: "John Green", date: "12 Apr 2024", size: "1 KB", kind: "file" },
   { id: 6, name: "2023_07_30_Quarterly_Audit_Report.pdf", createdBy: "John Green", date: "12 Apr 2024", size: "1 KB", kind: "file" },
@@ -59,46 +53,28 @@ export const documentColumns: DataTableProps<DocumentItem>["columns"] = [
     key: "name",
     header: "Name",
     sortable: true,
+    sortField: "name",
     render: renderNameCell,
     className: "text-sm text-gray-900 dark:text-neutral-100",
   },
   {
     key: "createdBy",
     header: "Created by",
-    sortable: true,
+    sortable: false,
     className: "text-sm text-gray-500 dark:text-neutral-400",
   },
   {
     key: "date",
     header: "Date",
     sortable: true,
+    sortField: "createdAt",
     className: "text-sm text-gray-500 dark:text-neutral-400",
   },
   {
     key: "size",
     header: "Size",
-    sortable: false,
+    sortable: true,
+    sortField: "size",
     className: "text-sm text-gray-500 dark:text-neutral-400",
-  },
-];
-
-export const multiSelectOptions: MultiSelectOption[] = [
-  {
-    value: "1",
-    label: "James Collins",
-    iconSrc:
-      "https://images.unsplash.com/photo-1659482633369-9fe69af50bfb?auto=format&fit=facearea&facepad=3&w=80&h=80&q=80",
-  },
-  {
-    value: "2",
-    label: "Amanda Harvey",
-    iconSrc:
-      "https://images.unsplash.com/photo-1541101767792-f9b2b1c4f127?auto=format&fit=facearea&facepad=3&w=80&h=80&q=80",
-  },
-  {
-    value: "3",
-    label: "Costa Quinn",
-    iconSrc:
-      "https://images.unsplash.com/photo-1601935111741-ae98b2b230b0?auto=format&fit=facearea&facepad=3&w=80&h=80&q=80",
   },
 ];
