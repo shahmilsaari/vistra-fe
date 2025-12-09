@@ -73,7 +73,7 @@ export function TestLoadingClient() {
             </li>
             <li className="flex items-start gap-2">
               <span className="text-orange-500">•</span>
-              <span>Try "Slow Navigation" to see the loading bar for a longer duration</span>
+            <span>Try &quot;Slow Navigation&quot; to see the loading bar for a longer duration</span>
             </li>
           </ul>
         </div>

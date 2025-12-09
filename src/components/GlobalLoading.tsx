@@ -9,12 +9,7 @@ export function GlobalLoading() {
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    setIsLoading(false);
-  }, [pathname, searchParams]);
-
-  useEffect(() => {
     const handleStart = () => setIsLoading(true);
-    const handleComplete = () => setIsLoading(false);
 
     // Listen for route changes
     window.addEventListener("beforeunload", handleStart);
@@ -23,6 +18,13 @@ export function GlobalLoading() {
       window.removeEventListener("beforeunload", handleStart);
     };
   }, []);
+
+  useEffect(() => {
+    const animationFrame = window.requestAnimationFrame(() => {
+      setIsLoading(false);
+    });
+    return () => window.cancelAnimationFrame(animationFrame);
+  }, [pathname, searchParams]);
 
   if (!isLoading) return null;
 

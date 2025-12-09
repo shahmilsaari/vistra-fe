@@ -73,9 +73,6 @@ export default async function HomePage() {
       initialData={initialData}
       initialTotal={initialTotal}
       initialUser={user ?? undefined}
-      defaultSortField={DEFAULT_SORT.field}
-      defaultSortOrder={DEFAULT_SORT.order}
-      defaultPageSize={DEFAULT_LIMIT}
     />
   );
 }

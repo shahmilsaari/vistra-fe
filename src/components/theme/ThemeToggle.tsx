@@ -12,7 +12,10 @@ export function ThemeToggle() {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
+    const animationFrame = window.requestAnimationFrame(() => {
+      setMounted(true);
+    });
+    return () => window.cancelAnimationFrame(animationFrame);
   }, []);
 
   if (!mounted) {

@@ -9,27 +9,42 @@ export function useAttachmentData(
   isAuthLoading?: boolean
 ) {
   const addToast = useToastStore((state) => state.addToast);
-  const [attachment, setAttachment] = useState<AttachmentItem | null>(initialDetail?.attachment ?? null);
-  const [logs, setLogs] = useState<AttachmentLog[]>(initialDetail?.logs?.data ?? []);
-  const [isLoading, setIsLoading] = useState(!initialDetail);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const isValidId = Boolean(attachmentId && !Number.isNaN(attachmentId));
+  const [attachment, setAttachment] = useState<AttachmentItem | null>(
+    isValidId ? initialDetail?.attachment ?? null : null
+  );
+  const [logs, setLogs] = useState<AttachmentLog[]>(isValidId ? initialDetail?.logs?.data ?? [] : []);
+  const [isLoading, setIsLoading] = useState(isValidId && !initialDetail);
+  const [errorMessage, setErrorMessage] = useState<string | null>(
+    isValidId ? null : "Invalid attachment identifier."
+  );
   const hasLoadedOnce = useRef(Boolean(initialDetail));
+
+  useEffect(() => {
+    if (isValidId) return;
+
+    const resetFrame = window.requestAnimationFrame(() => {
+      setErrorMessage("Invalid attachment identifier.");
+      setIsLoading(false);
+      setAttachment(null);
+      setLogs([]);
+    });
+
+    return () => window.cancelAnimationFrame(resetFrame);
+  }, [isValidId]);
 
   useEffect(() => {
     if (isAuthLoading) return;
     if (hasLoadedOnce.current) return;
-
-    if (!attachmentId || Number.isNaN(attachmentId)) {
-      setErrorMessage("Invalid attachment identifier.");
-      setIsLoading(false);
-      setAttachment(null);
-      return;
-    }
+    if (!isValidId) return;
 
     const controller = new AbortController();
-    setIsLoading(true);
-    setErrorMessage(null);
-    setAttachment(null);
+    const startFrame = window.requestAnimationFrame(() => {
+      setIsLoading(true);
+      setErrorMessage(null);
+      setAttachment(null);
+      setLogs([]);
+    });
     hasLoadedOnce.current = true;
 
     fetchAttachment(attachmentId, controller.signal)
@@ -45,8 +60,11 @@ export function useAttachmentData(
       })
       .finally(() => setIsLoading(false));
 
-    return () => controller.abort();
-  }, [attachmentId, addToast, isAuthLoading]);
+    return () => {
+      window.cancelAnimationFrame(startFrame);
+      controller.abort();
+    };
+  }, [attachmentId, addToast, isAuthLoading, isValidId]);
 
   return {
     attachment,

@@ -37,6 +37,11 @@ Open http://localhost:3000
 npm run lint
 ```
 
+## Formatting
+- Install Prettier locally (`npm install --save-dev prettier`) if it isn't already available.
+- Format changed files with `npx prettier --write .` before committing.
+- Check formatting with `npx prettier --check .` to verify nothing needs rewriting.
+
 ## Folder Structure
 - `src/app` – route handlers (SSR shells)
 - `src/modules` – feature-level client components

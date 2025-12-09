@@ -18,18 +18,12 @@ type HomePageClientProps = {
   initialData?: DocumentItem[];
   initialTotal?: number;
   initialUser?: UserProfile | null;
-  defaultSortField?: string;
-  defaultSortOrder?: "asc" | "desc";
-  defaultPageSize?: number;
 };
 
 export function HomePageClient({
   initialData = [],
   initialTotal,
   initialUser,
-  defaultSortField = "createdAt",
-  defaultSortOrder = "desc",
-  defaultPageSize = 25,
 }: HomePageClientProps) {
   const router = useRouterLoading();
   const { user, isLoading: isAuthLoading } = useAuth();
@@ -44,7 +38,6 @@ export function HomePageClient({
   const [isFetchingAttachments, setIsFetchingAttachments] = useState(false);
   const [deletingAttachmentId, setDeletingAttachmentId] = useState<number | null>(null);
   const [itemToDelete, setItemToDelete] = useState<DocumentItem | null>(null);
-  const [showUploadModal, setShowUploadModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const showSkeleton = isFetchingAttachments && tableData.length === 0;

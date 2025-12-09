@@ -35,10 +35,16 @@ export function RemarksDrawer({
     if (!attachmentId || !isOpen) return;
 
     const controller = new AbortController();
-    setRemarksLoading(true);
-    setRemarksError(null);
+    const startFrame = window.requestAnimationFrame(() => {
+      setRemarksLoading(true);
+      setRemarksError(null);
+    });
 
-    fetchAttachmentRemarks(attachmentId, { page: remarksPage, limit: REMARKS_PAGE_LIMIT, signal: controller.signal })
+    fetchAttachmentRemarks(attachmentId, {
+      page: remarksPage,
+      limit: REMARKS_PAGE_LIMIT,
+      signal: controller.signal,
+    })
       .then((payload) => {
         const nextRemarks = Array.isArray(payload.data) ? payload.data : [];
         setRemarks(nextRemarks);
@@ -52,7 +58,10 @@ export function RemarksDrawer({
       })
       .finally(() => setRemarksLoading(false));
 
-    return () => controller.abort();
+    return () => {
+      window.cancelAnimationFrame(startFrame);
+      controller.abort();
+    };
   }, [addToast, attachmentId, remarksPage, remarksRefreshKey, isOpen]);
 
   const handleRemarkCreateSuccess = () => {
