@@ -16,8 +16,9 @@ npm install
 ```
 2) Set environment:
 ```bash
-cp .env.example .env   # ensure NEXT_PUBLIC_API_BASE_URL is set
+cp .env.example .env   # contains NEXT_PUBLIC_API_BASE_URL pointing at your API host
 ```
+Update any other variables that your deployment or local setup requires after copying.
 3) Run dev server:
 ```bash
 npm run dev
