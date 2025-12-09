@@ -5,7 +5,10 @@ export const API_BASE_URL = (() => {
   return rawBase.replace(/\/+$/, "");
 })();
 
-type RequestOptions = RequestInit & { signal?: AbortSignal };
+type RequestOptions = RequestInit & {
+  signal?: AbortSignal;
+  suppressLogoutOn401?: boolean;
+};
 
 // Global logout handler - will be set by the auth provider
 let globalLogoutHandler: (() => void) | null = null;
@@ -157,7 +160,8 @@ const normalizePaginatedRemarks = (payload: unknown): PaginatedRemarksDto => {
 async function request<T>(path: string, init: RequestOptions = {}): Promise<T> {
   const cleanedPath = path.startsWith("/") ? path : `/${path}`;
   const url = `${API_BASE_URL}${cleanedPath}`;
-  const headers = new Headers(init.headers ?? {});
+  const { suppressLogoutOn401, headers: initHeaders, ...fetchInit } = init;
+  const headers = new Headers(initHeaders ?? {});
   headers.set("Accept", "application/json");
   const token = getToken();
   if (token && !headers.has("Authorization")) {
@@ -167,8 +171,8 @@ async function request<T>(path: string, init: RequestOptions = {}): Promise<T> {
   let response: Response;
   try {
     response = await fetch(url, {
-      ...init,
-      credentials: init.credentials ?? "include",
+      ...fetchInit,
+      credentials: fetchInit.credentials ?? "include",
       headers,
     });
   } catch (error) {
@@ -178,17 +182,17 @@ async function request<T>(path: string, init: RequestOptions = {}): Promise<T> {
     throw new Error("Unable to reach the API. Please try again.");
   }
 
-  // Handle 401 Unauthorized - trigger automatic logout
-  if (response.status === 401) {
+  const payload = await response.json().catch(() => null);
+  const body = unwrapResponse<T>(payload);
+
+  // Handle 401 Unauthorized - trigger automatic logout unless suppressed
+  if (response.status === 401 && !suppressLogoutOn401) {
     clearToken();
     if (globalLogoutHandler) {
       globalLogoutHandler();
     }
     throw new Error("Your session has expired. Please log in again.");
   }
-
-  const payload = await response.json().catch(() => null);
-  const body = unwrapResponse<T>(payload);
 
   if (!response.ok) {
     const message =
@@ -352,6 +356,7 @@ export async function login(credentials: Credentials): Promise<AuthPayload> {
       "Content-Type": "application/json",
     },
     body: JSON.stringify(credentials),
+    suppressLogoutOn401: true,
   }).then(normalizeAuthPayload);
 }
 
