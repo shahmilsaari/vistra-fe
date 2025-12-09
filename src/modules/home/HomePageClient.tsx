@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useMemo, useState, useRef } from "react";
-import { DataTable } from "@/components/ui";
+import { useCallback, useEffect, useState, useRef } from "react";
+import { DataTable, Modal } from "@/components/ui";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { deleteAttachment, deleteDirectory, fetchAttachments } from "@/services/api";
 import { useToastStore, useUIStore, useUserStore, useTableStore } from "@/stores";
@@ -43,6 +43,7 @@ export function HomePageClient({
   const [totalAttachments, setTotalAttachments] = useState<number | undefined>(initialTotal);
   const [isFetchingAttachments, setIsFetchingAttachments] = useState(false);
   const [deletingAttachmentId, setDeletingAttachmentId] = useState<number | null>(null);
+  const [itemToDelete, setItemToDelete] = useState<DocumentItem | null>(null);
   const [showUploadModal, setShowUploadModal] = useState(false);
   const showSkeleton = isFetchingAttachments && tableData.length === 0;
   const hasHydratedUser = useRef(false);
@@ -134,6 +135,44 @@ export function HomePageClient({
   return (
     <ProtectedRoute title="Files" subtitle="Manage and organize your documents.">
       <div className="max-w-7xl mx-auto space-y-8">
+        {/* Delete Confirmation Modal */}
+        <Modal
+          isOpen={Boolean(itemToDelete)}
+          onClose={() => setItemToDelete(null)}
+          title="Delete item"
+          maxWidth="max-w-md"
+          footer={
+            <div className="flex justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => setItemToDelete(null)}
+                className="py-2 px-4 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-neutral-200 bg-white text-neutral-800 shadow-sm hover:bg-neutral-50 disabled:opacity-50 dark:bg-neutral-800 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-700"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={!itemToDelete || deletingAttachmentId === itemToDelete.id}
+                onClick={async () => {
+                  if (!itemToDelete) return;
+                  await handleDeleteItem(itemToDelete);
+                  setItemToDelete(null);
+                }}
+                className="py-2 px-4 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-red-200 bg-white text-red-600 hover:bg-red-50 disabled:opacity-50 dark:border-red-500/60 dark:bg-white dark:text-red-600 dark:hover:bg-red-50"
+              >
+                {itemToDelete && deletingAttachmentId === itemToDelete.id ? (
+                  <span className="size-3.5 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                ) : null}
+                Delete
+              </button>
+            </div>
+          }
+        >
+          <p className="text-sm text-neutral-600 dark:text-neutral-400">
+            Are you sure you want to delete{" "}
+            <span className="font-medium">{itemToDelete?.name}</span>? This action cannot be undone.
+          </p>
+        </Modal>
         {/* Header with Actions */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
@@ -150,15 +189,6 @@ export function HomePageClient({
 
         {/* Files Section */}
         <section className="pt-4">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6">
-            <div>
-              <h2 className="text-xl font-semibold text-neutral-900 dark:text-white">Your Files</h2>
-              <p className="text-sm text-neutral-500 dark:text-neutral-400">
-                {totalAttachments ? `${totalAttachments} items` : "Manage your documents"}
-              </p>
-            </div>
-          </div>
-
           {showSkeleton ? (
             <div className="rounded-2xl bg-white dark:bg-neutral-800 overflow-hidden">
               <div className="divide-y divide-neutral-100 dark:divide-neutral-700/50">
@@ -225,7 +255,7 @@ export function HomePageClient({
                   )}
                   <button
                     type="button"
-                    onClick={() => handleDeleteItem(row)}
+                    onClick={() => setItemToDelete(row)}
                     disabled={deletingAttachmentId === row.id}
                     className="py-1.5 px-3 inline-flex items-center gap-x-1.5 text-xs font-medium rounded-lg border border-red-200 bg-red-50 text-red-600 hover:bg-red-100 focus:outline-none focus:bg-red-100 disabled:opacity-50 disabled:pointer-events-none dark:bg-red-800/20 dark:border-red-700 dark:text-red-400 dark:hover:bg-red-800/30 dark:focus:bg-red-800/30"
                   >

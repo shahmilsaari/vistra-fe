@@ -12,3 +12,4 @@ export { Canva } from "./Canva";
 export type { CanvaProps } from "./Canva";
 export { Select } from "./Select";
 export type { SelectProps } from "./Select";
+export { Drawer } from "./Drawer";

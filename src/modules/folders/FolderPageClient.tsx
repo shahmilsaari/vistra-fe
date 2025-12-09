@@ -118,6 +118,7 @@ export function FolderPageClient({
         isOpen={Boolean(itemToDelete)}
         onClose={() => setItemToDelete(null)}
         title="Delete item"
+        maxWidth="max-w-md"
         footer={
           <div className="flex justify-end gap-3">
             <button
@@ -131,7 +132,7 @@ export function FolderPageClient({
               type="button"
               onClick={confirmDelete}
               disabled={deletingId !== null}
-              className="py-2 px-4 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg bg-red-600 text-white hover:bg-red-700 disabled:opacity-50"
+              className="py-2 px-4 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-red-200 bg-white text-red-600 hover:bg-red-50 disabled:opacity-50 dark:border-red-500/60 dark:bg-white dark:text-red-600 dark:hover:bg-red-50"
             >
               Delete
             </button>

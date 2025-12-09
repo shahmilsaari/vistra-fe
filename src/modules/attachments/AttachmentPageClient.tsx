@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Button, Spinner, FileIcon, Modal } from "@/components/ui";
+import { Button, Spinner, FileIcon, Modal, Drawer } from "@/components/ui";
 import { AppLayout, Breadcrumb } from "@/components/layout";
 import {
   AttachmentItem,
@@ -213,14 +213,31 @@ export function AttachmentPageClient({ attachmentId, initialDetail, initialUser 
   }
 
   // Build breadcrumb items
+  const pathCrumb = (() => {
+    if (!attachment?.path) return null;
+
+    if (typeof attachment.path === "string") {
+      const folderSlug = attachment.path.replace(/\//g, "");
+      if (!folderSlug) return null;
+      return {
+        label: folderSlug,
+        href: `/folders/${folderSlug}`,
+      };
+    }
+
+    if (attachment.path.name) {
+      return {
+        label: attachment.path.name,
+        href: `/folders/${attachment.path.name}`,
+      };
+    }
+
+    return null;
+  })();
+
   const breadcrumbItems = [
     { label: "All folders", href: "/" },
-    ...(attachment?.path
-      ? [{
-        label: typeof attachment.path === 'string' ? attachment.path.replace(/\//g, '') : attachment.path.name,
-        href: typeof attachment.path === 'string' ? `/folders/${attachment.path.replace(/\//g, '')}` : `/folders/${attachment.path.name}`,
-      }]
-      : []),
+    ...(pathCrumb ? [pathCrumb] : []),
     { label: attachment?.name ?? "Loading..." },
   ];
 
@@ -231,6 +248,7 @@ export function AttachmentPageClient({ attachmentId, initialDetail, initialUser 
         isOpen={showDeleteModal}
         onClose={() => setShowDeleteModal(false)}
         title="Delete attachment"
+        maxWidth="max-w-md"
         footer={
           <div className="flex justify-end gap-3">
             <button
@@ -244,7 +262,7 @@ export function AttachmentPageClient({ attachmentId, initialDetail, initialUser 
               type="button"
               onClick={handleDelete}
               disabled={isDeleting}
-              className="py-2 px-4 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg bg-red-600 text-white hover:bg-red-700 disabled:opacity-50"
+              className="py-2 px-4 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-red-200 bg-white text-red-600 hover:bg-red-50 disabled:opacity-50 dark:border-red-500/60 dark:bg-white dark:text-red-600 dark:hover:bg-red-50"
             >
               {isDeleting ? "Deleting..." : "Delete"}
             </button>
@@ -274,7 +292,7 @@ export function AttachmentPageClient({ attachmentId, initialDetail, initialUser 
       ) : (
         <div className="p-6 lg:p-8">
           {/* File Header Section */}
-          <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-8 pb-8 border-b border-neutral-200 dark:border-neutral-700">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pb-6">
             {/* File Info */}
             <div className="flex items-start gap-4">
               <div className="flex size-16 shrink-0 items-center justify-center rounded-xl bg-neutral-100 dark:bg-neutral-800">
@@ -304,22 +322,17 @@ export function AttachmentPageClient({ attachmentId, initialDetail, initialUser 
                   </button>
                   <button
                     type="button"
-                    className="inline-flex items-center gap-1.5 text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-medium"
-                  >
-                    Share
-                    <svg className="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
-                    </svg>
-                  </button>
-                  <button
-                    type="button"
                     onClick={() => setShowDeleteModal(true)}
-                    className="inline-flex items-center gap-1.5 text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-medium"
+                    className="inline-flex items-center gap-1.5 text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 font-medium"
                   >
-                    More actions
+                    Delete
                     <svg className="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                      />
                     </svg>
                   </button>
                 </div>
@@ -327,7 +340,7 @@ export function AttachmentPageClient({ attachmentId, initialDetail, initialUser 
             </div>
 
             {/* Info Card - Yellow/Lime dashed box */}
-            <div className="rounded-xl border-2 border-dashed border-lime-300 bg-lime-50 p-5 dark:border-lime-600 dark:bg-lime-900/20 lg:min-w-[300px]">
+            <div className="rounded-xl border-2 border-dashed border-lime-300 bg-lime-50 p-5 dark:border-lime-600 dark:bg-lime-900/20">
               <p className="text-sm text-neutral-700 dark:text-neutral-300">
                 Last updated on <span className="font-medium">{formatDate(attachment.updatedAt)}</span>
               </p>
@@ -358,8 +371,11 @@ export function AttachmentPageClient({ attachmentId, initialDetail, initialUser 
             </div>
           </div>
 
+          {/* Divider between header and timeline */}
+          <div className="mt-4 mb-6 h-px bg-neutral-200 dark:bg-neutral-700" />
+
           {/* Document Timeline */}
-          <div className="mt-8">
+          <div>
             <h2 className="text-lg font-semibold text-neutral-900 dark:text-white mb-6">Document timeline</h2>
             <div className="overflow-x-auto">
               <table className="w-full">
@@ -402,128 +418,122 @@ export function AttachmentPageClient({ attachmentId, initialDetail, initialUser 
         </div>
       )}
 
-      {/* Remarks Slide-over Panel */}
-      {showRemarks && (
-        <>
-          <div className="fixed inset-0 bg-black/20 z-40" onClick={() => setShowRemarks(false)} />
-          <div className="fixed top-0 end-0 bottom-0 z-50 w-full max-w-md bg-white border-s border-neutral-200 dark:bg-neutral-800 dark:border-neutral-700 flex flex-col shadow-2xl">
-            {/* Header */}
-            <div className="flex items-center justify-between px-6 py-4 border-b border-neutral-200 dark:border-neutral-700">
-              <h3 className="text-lg font-semibold text-neutral-900 dark:text-white">Remarks</h3>
+      {/* Remarks Drawer */}
+      <Drawer
+        isOpen={showRemarks}
+        onClose={() => setShowRemarks(false)}
+        title="Remarks"
+        maxWidth="max-w-md"
+      >
+        {/* File pill */}
+        <div className="mb-4 rounded-lg bg-neutral-100 px-3 py-2 flex items-center gap-2 dark:bg-neutral-800">
+          <div className="flex size-7 shrink-0 items-center justify-center rounded bg-white dark:bg-neutral-700">
+            <FileIcon
+              kind={attachment?.kind}
+              name={attachment?.name ?? ""}
+              className="size-4 text-neutral-500 dark:text-neutral-400"
+            />
+          </div>
+          <p className="text-sm font-medium text-neutral-900 dark:text-white truncate">
+            {attachment?.name}
+          </p>
+        </div>
+
+        {/* Add Remark button */}
+        <div className="mb-4">
+          <RemarkModal
+            attachmentId={attachmentId}
+            onCreateSuccess={handleRemarkCreateSuccess}
+            renderTrigger={(open) => (
               <button
                 type="button"
-                onClick={() => setShowRemarks(false)}
-                className="size-8 inline-flex justify-center items-center rounded-lg text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-700"
+                onClick={open}
+                className="w-full py-2 px-4 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-lg border border-blue-600 text-blue-600 hover:bg-blue-50 dark:border-blue-500 dark:text-blue-500 dark:hover:bg-blue-900/20"
               >
-                <svg className="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                <svg className="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                 </svg>
+                Add Remark
+              </button>
+            )}
+          />
+        </div>
+
+        {/* Remarks list */}
+        {remarksLoading ? (
+          <div className="flex h-40 items-center justify-center">
+            <Spinner size="sm" />
+          </div>
+        ) : remarksError ? (
+          <p className="text-sm text-red-600 dark:text-red-400">{remarksError}</p>
+        ) : !Array.isArray(remarks) || remarks.length === 0 ? (
+          <div className="flex flex-col items-center justify-center h-40 text-center">
+            <div className="rounded-full bg-neutral-100 p-3 dark:bg-neutral-700 mb-3">
+              <svg className="size-6 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
+              </svg>
+            </div>
+            <p className="text-sm text-neutral-500 dark:text-neutral-400">No remarks have been added yet.</p>
+          </div>
+        ) : (
+          <div className="space-y-5">
+            {remarks.map((remark) => (
+              <div key={remark.id} className="pb-4 border-b last:border-b-0 border-neutral-100 dark:border-neutral-800">
+                <div className="flex items-start gap-3 mb-2">
+                  <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-neutral-200 dark:bg-neutral-700 text-sm font-semibold text-neutral-600 dark:text-neutral-300">
+                    {remark.user.name ? remark.user.name.charAt(0).toUpperCase() : "?"}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-start justify-between gap-2">
+                      <div>
+                        <p className="text-sm font-semibold text-neutral-900 dark:text-white">
+                          {remark.user.name}
+                        </p>
+                        <p className="text-xs text-neutral-500 dark:text-neutral-400">
+                          {remark.title}
+                        </p>
+                      </div>
+                      <span className="text-xs text-neutral-400 whitespace-nowrap">
+                        {formatDateTime(remark.createdAt)}
+                      </span>
+                    </div>
+                    <p className="mt-2 text-sm text-neutral-700 dark:text-neutral-300 leading-relaxed">
+                      {remark.message}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Pagination Footer */}
+        {totalRemarksPages > 1 && (
+          <div className="mt-4 flex items-center justify-between gap-3 border-t border-neutral-200 pt-3 dark:border-neutral-700">
+            <span className="text-xs text-neutral-500 dark:text-neutral-400">
+              Page {currentRemarksPage} of {totalRemarksPages}
+            </span>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setRemarksPage((prev) => Math.max(prev - 1, 1))}
+                disabled={!canGoToPreviousRemarksPage || remarksLoading}
+                className="py-1.5 px-3 text-xs font-medium rounded-lg border border-neutral-200 bg-white text-neutral-800 hover:bg-neutral-50 disabled:opacity-50 dark:bg-neutral-800 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-700"
+              >
+                Previous
+              </button>
+              <button
+                type="button"
+                onClick={() => setRemarksPage((prev) => Math.min(prev + 1, totalRemarksPages))}
+                disabled={!canGoToNextRemarksPage || remarksLoading}
+                className="py-1.5 px-3 text-xs font-medium rounded-lg border border-neutral-200 bg-white text-neutral-800 hover:bg-neutral-50 disabled:opacity-50 dark:bg-neutral-800 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-700"
+              >
+                Next
               </button>
             </div>
-
-            {/* File Info Card */}
-            <div className="px-6 py-4 bg-neutral-50 border-b border-neutral-200 dark:bg-neutral-800/50 dark:border-neutral-700">
-              <div className="flex items-center gap-3 p-3 rounded-lg bg-blue-50 border border-blue-100 dark:bg-blue-900/20 dark:border-blue-800">
-                <div className="flex size-8 shrink-0 items-center justify-center rounded bg-white dark:bg-neutral-700">
-                  <FileIcon
-                    kind={attachment?.kind}
-                    name={attachment?.name ?? ""}
-                    className="size-4 text-neutral-500 dark:text-neutral-400"
-                  />
-                </div>
-                <span className="text-sm font-medium text-neutral-900 dark:text-white truncate">{attachment?.name}</span>
-              </div>
-            </div>
-
-            {/* Add Remark Button */}
-            <div className="px-6 py-4 border-b border-neutral-200 dark:border-neutral-700">
-              <RemarkModal
-                attachmentId={attachmentId}
-                onCreateSuccess={handleRemarkCreateSuccess}
-                renderTrigger={(open) => (
-                  <button
-                    type="button"
-                    onClick={open}
-                    className="w-full py-2 px-4 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-lg border border-blue-600 text-blue-600 hover:bg-blue-50 dark:border-blue-500 dark:text-blue-500 dark:hover:bg-blue-900/20"
-                  >
-                    <svg className="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                    </svg>
-                    Add Remark
-                  </button>
-                )}
-              />
-            </div>
-
-            {/* Remarks List */}
-            <div className="flex-1 overflow-y-auto p-6">
-              {remarksLoading ? (
-                <div className="flex h-full items-center justify-center">
-                  <Spinner size="sm" />
-                </div>
-              ) : remarksError ? (
-                <p className="text-sm text-red-600 dark:text-red-400">{remarksError}</p>
-              ) : !Array.isArray(remarks) || remarks.length === 0 ? (
-                <div className="flex flex-col items-center justify-center h-full text-center">
-                  <div className="rounded-full bg-neutral-100 p-3 dark:bg-neutral-700 mb-3">
-                    <svg className="size-6 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
-                    </svg>
-                  </div>
-                  <p className="text-sm text-neutral-500 dark:text-neutral-400">No remarks have been added yet.</p>
-                </div>
-              ) : (
-                <div className="space-y-6">
-                  {remarks.map((remark) => (
-                    <div key={remark.id} className="flex gap-3">
-                      <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-neutral-200 dark:bg-neutral-700 text-sm font-semibold text-neutral-600 dark:text-neutral-300">
-                        {remark.user.name ? remark.user.name.charAt(0).toUpperCase() : "?"}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-start justify-between gap-2">
-                          <div>
-                            <p className="text-sm font-semibold text-neutral-900 dark:text-white">{remark.user.name}</p>
-                            <p className="text-xs text-neutral-500 dark:text-neutral-400">{remark.title}</p>
-                          </div>
-                          <span className="text-xs text-neutral-400 whitespace-nowrap">{formatDateTime(remark.createdAt)}</span>
-                        </div>
-                        <p className="mt-2 text-sm text-neutral-600 dark:text-neutral-300 leading-relaxed">{remark.message}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Pagination Footer */}
-            {totalRemarksPages > 1 && (
-              <div className="flex items-center justify-between gap-3 px-6 py-4 border-t border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800/50">
-                <span className="text-xs text-neutral-500 dark:text-neutral-400">
-                  Page {currentRemarksPage} of {totalRemarksPages}
-                </span>
-                <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setRemarksPage((prev) => Math.max(prev - 1, 1))}
-                    disabled={!canGoToPreviousRemarksPage || remarksLoading}
-                    className="py-1.5 px-3 text-xs font-medium rounded-lg border border-neutral-200 bg-white text-neutral-800 hover:bg-neutral-50 disabled:opacity-50 dark:bg-neutral-800 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-700"
-                  >
-                    Previous
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setRemarksPage((prev) => Math.min(prev + 1, totalRemarksPages))}
-                    disabled={!canGoToNextRemarksPage || remarksLoading}
-                    className="py-1.5 px-3 text-xs font-medium rounded-lg border border-neutral-200 bg-white text-neutral-800 hover:bg-neutral-50 disabled:opacity-50 dark:bg-neutral-800 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-700"
-                  >
-                    Next
-                  </button>
-                </div>
-              </div>
-            )}
           </div>
-        </>
-      )}
+        )}
+      </Drawer>
     </AppLayout>
   );
 }
