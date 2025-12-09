@@ -10,7 +10,7 @@ type HeaderProps = {
   subtitle?: string;
 };
 
-export function Header({ title = "Dashboard", subtitle }: HeaderProps) {
+export function Header({ title = "Files", subtitle }: HeaderProps) {
   const router = useRouter();
   const user = useUserStore((state) => state.user);
   const clearUser = useUserStore((state) => state.clearUser);

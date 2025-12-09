@@ -37,18 +37,17 @@ export function HomePageClient({
   const setUser = useUserStore((state) => state.setUser);
   const addToast = useToastStore((state) => state.addToast);
 
-  // Table store for pagination and sorting
   const { pageSize, sortField, sortOrder, setPageSize, setSorting } = useTableStore();
 
   const [tableData, setTableData] = useState<DocumentItem[]>(initialData);
   const [totalAttachments, setTotalAttachments] = useState<number | undefined>(initialTotal);
   const [isFetchingAttachments, setIsFetchingAttachments] = useState(false);
   const [deletingAttachmentId, setDeletingAttachmentId] = useState<number | null>(null);
+  const [showUploadModal, setShowUploadModal] = useState(false);
   const showSkeleton = isFetchingAttachments && tableData.length === 0;
   const hasHydratedUser = useRef(false);
   const hasLoadedOnce = useRef(false);
 
-  // Seed the user store with server-provided data to avoid a flash before hydration completes.
   useEffect(() => {
     if (!hasHydratedUser.current && initialUser && !user) {
       setUser(initialUser);
@@ -86,11 +85,8 @@ export function HomePageClient({
     [addToast, sortField, sortOrder, pageSize]
   );
 
-  // Initial load on auth complete
   useEffect(() => {
-    if (hasLoadedOnce.current) {
-      return;
-    }
+    if (hasLoadedOnce.current) return;
     if (!isAuthLoading && user) {
       hasLoadedOnce.current = true;
       const controller = new AbortController();
@@ -99,11 +95,8 @@ export function HomePageClient({
     }
   }, [isAuthLoading, user, loadAttachments]);
 
-  // Reload when pagination or sorting changes
   useEffect(() => {
-    if (!hasLoadedOnce.current || isAuthLoading || !user) {
-      return;
-    }
+    if (!hasLoadedOnce.current || isAuthLoading || !user) return;
     const controller = new AbortController();
     loadAttachments(controller.signal);
     return () => controller.abort();
@@ -138,123 +131,125 @@ export function HomePageClient({
     setPageSize(size);
   }, [setPageSize]);
 
-  const displayUser = useMemo(() => user ?? initialUser ?? null, [initialUser, user]);
-
   return (
-    <ProtectedRoute title="Dashboard" subtitle={`Welcome back, ${displayUser?.name?.split(" ")[0] ?? "User"}`}>
-      <div className="max-w-7xl mx-auto space-y-6">
-        {/* Page Header */}
+    <ProtectedRoute title="Files" subtitle="Manage and organize your documents.">
+      <div className="max-w-7xl mx-auto space-y-8">
+        {/* Header with Actions */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h2 className="text-xl font-semibold text-neutral-800 dark:text-neutral-200 flex items-center gap-2">
-              <svg className="h-5 w-5 text-violet-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
-              Documents
-            </h2>
-            <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-500">Manage and organize your files efficiently</p>
+            <h1 className="text-3xl font-bold text-neutral-900 dark:text-white">Your Files</h1>
+            <p className="mt-1 text-neutral-500 dark:text-neutral-400">
+              Upload, organize, and collaborate on your documents.
+            </p>
           </div>
           <div className="flex items-center gap-3">
-            <CreateFolderModal onCreateSuccess={loadAttachments} />
             <UploadFileModal onUploadSuccess={loadAttachments} />
+            <CreateFolderModal onCreateSuccess={loadAttachments} />
           </div>
         </div>
 
-        {/* Table Card */}
-        {showSkeleton ? (
-          <div className="bg-white dark:bg-neutral-800 rounded-xl border border-neutral-200 dark:border-neutral-700 overflow-hidden">
-            <div className="p-4 border-b border-neutral-200 dark:border-neutral-700">
-              <div className="h-5 w-48 rounded bg-neutral-200 dark:bg-neutral-700 animate-pulse" />
-            </div>
-            <div className="divide-y divide-neutral-200 dark:divide-neutral-700">
-              {Array.from({ length: 5 }).map((_, idx) => (
-                <div key={idx} className="flex items-center gap-4 p-4">
-                  <div className="h-10 w-10 rounded-lg bg-neutral-200 dark:bg-neutral-700 animate-pulse" />
-                  <div className="flex-1 space-y-2">
-                    <div className="h-4 w-1/3 rounded bg-neutral-200 dark:bg-neutral-700 animate-pulse" />
-                    <div className="h-3 w-1/4 rounded bg-neutral-200 dark:bg-neutral-700 animate-pulse" />
-                  </div>
-                  <div className="flex gap-2">
-                    <div className="h-8 w-16 rounded-lg bg-neutral-200 dark:bg-neutral-700 animate-pulse" />
-                    <div className="h-8 w-16 rounded-lg bg-neutral-200 dark:bg-neutral-700 animate-pulse" />
-                  </div>
-                </div>
-              ))}
+        {/* Files Section */}
+        <section className="pt-4">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6">
+            <div>
+              <h2 className="text-xl font-semibold text-neutral-900 dark:text-white">Your Files</h2>
+              <p className="text-sm text-neutral-500 dark:text-neutral-400">
+                {totalAttachments ? `${totalAttachments} items` : "Manage your documents"}
+              </p>
             </div>
           </div>
-        ) : (
-          <DataTable<DocumentItem>
-            data={tableData}
-            columns={documentColumns}
-            selectable={false}
-            getRowId={(row) => row.id}
-            renderActions={(row) => (
-              <div className="flex items-center justify-end gap-2">
-                {row.kind === "folder" ? (
-                  <button
-                    type="button"
-                    onClick={() => router.push(`/folders/${row.name}`)}
-                    className="py-1.5 px-3 inline-flex items-center gap-x-1.5 text-xs font-medium rounded-lg border border-violet-200 bg-violet-50 text-violet-600 hover:bg-violet-100 focus:outline-none focus:bg-violet-100 disabled:opacity-50 disabled:pointer-events-none dark:bg-violet-800/20 dark:border-violet-700 dark:text-violet-400 dark:hover:bg-violet-800/30 dark:focus:bg-violet-800/30"
-                  >
-                    <svg className="shrink-0 size-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
-                    </svg>
-                    Open
-                  </button>
-                ) : (
-                  <>
-                    <Link
-                      href={`/attachments/${row.id}`}
-                      className="py-1.5 px-3 inline-flex items-center gap-x-1.5 text-xs font-medium rounded-lg border border-neutral-200 bg-white text-neutral-800 shadow-sm hover:bg-neutral-50 focus:outline-none focus:bg-neutral-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-700 dark:focus:bg-neutral-700"
+
+          {showSkeleton ? (
+            <div className="rounded-2xl bg-white dark:bg-neutral-800 overflow-hidden">
+              <div className="divide-y divide-neutral-100 dark:divide-neutral-700/50">
+                {Array.from({ length: 5 }).map((_, idx) => (
+                  <div key={idx} className="flex items-center gap-4 p-4">
+                    <div className="h-10 w-10 rounded-xl bg-neutral-200 dark:bg-neutral-700 animate-pulse" />
+                    <div className="flex-1 space-y-2">
+                      <div className="h-4 w-1/3 rounded-lg bg-neutral-200 dark:bg-neutral-700 animate-pulse" />
+                      <div className="h-3 w-1/4 rounded-lg bg-neutral-200 dark:bg-neutral-700 animate-pulse" />
+                    </div>
+                    <div className="flex gap-2">
+                      <div className="h-8 w-16 rounded-lg bg-neutral-200 dark:bg-neutral-700 animate-pulse" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <DataTable<DocumentItem>
+              data={tableData}
+              columns={documentColumns}
+              selectable={false}
+              getRowId={(row) => row.id}
+              renderActions={(row) => (
+                <div className="flex items-center justify-end gap-2">
+                  {row.kind === "folder" ? (
+                    <button
+                      type="button"
+                      onClick={() => router.push(`/folders/${row.name}`)}
+                      className="py-1.5 px-3 inline-flex items-center gap-x-1.5 text-xs font-medium rounded-lg border border-emerald-200 bg-emerald-50 text-emerald-600 hover:bg-emerald-100 focus:outline-none focus:bg-emerald-100 disabled:opacity-50 disabled:pointer-events-none dark:bg-emerald-800/20 dark:border-emerald-700 dark:text-emerald-400 dark:hover:bg-emerald-800/30 dark:focus:bg-emerald-800/30"
                     >
                       <svg className="shrink-0 size-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
                       </svg>
-                      View
-                    </Link>
-                    <RemarkModal
-                      attachmentId={row.id}
-                      onCreateSuccess={loadAttachments}
-                      renderTrigger={(open) => (
-                        <button
-                          type="button"
-                          onClick={open}
-                          className="size-8 inline-flex justify-center items-center gap-x-2 text-sm font-semibold rounded-lg border border-indigo-200 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 focus:outline-none focus:bg-indigo-100 disabled:opacity-50 disabled:pointer-events-none dark:bg-indigo-800/20 dark:border-indigo-700 dark:text-indigo-400 dark:hover:bg-indigo-800/30 dark:focus:bg-indigo-800/30"
-                          aria-label="Add remark"
-                        >
-                          <ConversationIcon className="shrink-0 size-4" />
-                        </button>
-                      )}
-                    />
-                  </>
-                )}
-                <button
-                  type="button"
-                  onClick={() => handleDeleteItem(row)}
-                  disabled={deletingAttachmentId === row.id}
-                  className="py-1.5 px-3 inline-flex items-center gap-x-1.5 text-xs font-medium rounded-lg border border-red-200 bg-red-50 text-red-600 hover:bg-red-100 focus:outline-none focus:bg-red-100 disabled:opacity-50 disabled:pointer-events-none dark:bg-red-800/20 dark:border-red-700 dark:text-red-400 dark:hover:bg-red-800/30 dark:focus:bg-red-800/30"
-                >
-                  {deletingAttachmentId === row.id ? (
-                    <span className="size-3.5 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                      Open
+                    </button>
                   ) : (
-                    <svg className="shrink-0 size-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                    </svg>
+                    <>
+                      <Link
+                        href={`/attachments/${row.id}`}
+                        className="py-1.5 px-3 inline-flex items-center gap-x-1.5 text-xs font-medium rounded-lg border border-neutral-200 bg-white text-neutral-800 shadow-sm hover:bg-neutral-50 focus:outline-none focus:bg-neutral-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-700 dark:focus:bg-neutral-700"
+                      >
+                        <svg className="shrink-0 size-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        </svg>
+                        View
+                      </Link>
+                      <RemarkModal
+                        attachmentId={row.id}
+                        onCreateSuccess={loadAttachments}
+                        renderTrigger={(open) => (
+                          <button
+                            type="button"
+                            onClick={open}
+                            className="size-8 inline-flex justify-center items-center gap-x-2 text-sm font-semibold rounded-lg border border-indigo-200 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 focus:outline-none focus:bg-indigo-100 disabled:opacity-50 disabled:pointer-events-none dark:bg-indigo-800/20 dark:border-indigo-700 dark:text-indigo-400 dark:hover:bg-indigo-800/30 dark:focus:bg-indigo-800/30"
+                            aria-label="Add remark"
+                          >
+                            <ConversationIcon className="shrink-0 size-4" />
+                          </button>
+                        )}
+                      />
+                    </>
                   )}
-                  Delete
-                </button>
-              </div>
-            )}
-            isLoading={isTableLoading}
-            totalEntries={totalAttachments}
-            sortField={sortField}
-            sortOrder={sortOrder}
-            onSortChange={handleSortChange}
-            pageSize={pageSize}
-            onPageSizeChange={handlePageSizeChange}
-          />
-        )}
+                  <button
+                    type="button"
+                    onClick={() => handleDeleteItem(row)}
+                    disabled={deletingAttachmentId === row.id}
+                    className="py-1.5 px-3 inline-flex items-center gap-x-1.5 text-xs font-medium rounded-lg border border-red-200 bg-red-50 text-red-600 hover:bg-red-100 focus:outline-none focus:bg-red-100 disabled:opacity-50 disabled:pointer-events-none dark:bg-red-800/20 dark:border-red-700 dark:text-red-400 dark:hover:bg-red-800/30 dark:focus:bg-red-800/30"
+                  >
+                    {deletingAttachmentId === row.id ? (
+                      <span className="size-3.5 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                    ) : (
+                      <svg className="shrink-0 size-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                    )}
+                    Delete
+                  </button>
+                </div>
+              )}
+              isLoading={isTableLoading}
+              totalEntries={totalAttachments}
+              sortField={sortField}
+              sortOrder={sortOrder}
+              onSortChange={handleSortChange}
+              pageSize={pageSize}
+              onPageSizeChange={handlePageSizeChange}
+            />
+          )}
+        </section>
       </div>
     </ProtectedRoute>
   );

@@ -56,6 +56,7 @@ export default async function HomePage() {
   const { user } = await getServerAuth();
 
   let attachments = emptyAttachments;
+
   try {
     attachments = await fetchAttachmentsServer(cookieHeader);
   } catch {

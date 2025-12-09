@@ -46,10 +46,11 @@ export function UploadFileModal({ onUploadSuccess, folder }: UploadFileModalProp
         return;
       }
 
+      const fileNames = result.map((r) => r.name).join(", ");
       addToast({
         type: "success",
         title: "Upload complete",
-        message: `${result.length} file${result.length > 1 ? "s" : ""} added.`,
+        message: `${fileNames} uploaded successfully.`,
       });
       setFiles([]);
       onUploadSuccess?.();
