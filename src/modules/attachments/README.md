@@ -183,3 +183,11 @@ test("useAttachmentData fetches data", () => {
 - Add loading skeletons
 - Optimize re-renders with React.memo
 - Add accessibility improvements
+
+## GitHub Setup
+1. **Fork/clone the repo:** create a fork if needed, then run `git clone git@github.com:<your-github>/vistra-fe.git && cd vistra-fe`.
+2. **Create a working branch:** `git checkout -b feature/<short-description>` so your work stays isolated from `main`.
+3. **Install deps & env:** run `npm install`, then copy the example env (`cp .env.example .env`) and update `NEXT_PUBLIC_API_BASE_URL` plus any other service keys you need.
+4. **Focus on the attachments module:** work inside `src/modules/attachments`; keep the README and hooks/docs in sync with any UI or API changes you make.
+5. **Run locally & test:** use `npm run dev` to verify the app and `npm run lint` before committing.
+6. **Push & open a PR:** `git push --set-upstream origin feature/<short-description>`, then open a GitHub Pull Request describing your changes and tests.
