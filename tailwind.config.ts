@@ -9,7 +9,11 @@ const config: Config = {
     "./node_modules/preline/dist/*.js",
   ],
   theme: {
-    extend: {},
+    extend: {
+      animation: {
+        "loading-bar": "loading-bar 1s ease-in-out infinite",
+      },
+    },
   },
   plugins: [],
 };

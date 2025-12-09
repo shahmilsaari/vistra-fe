@@ -9,6 +9,18 @@
   }
 }
 
+@keyframes loading-bar {
+  0% {
+    transform: scaleX(0);
+  }
+  50% {
+    transform: scaleX(0.7);
+  }
+  100% {
+    transform: scaleX(1);
+  }
+}
+
 :root {
   --background: 0 0% 100%;
   --foreground: 220 60% 20%;

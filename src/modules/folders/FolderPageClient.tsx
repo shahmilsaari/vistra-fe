@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Spinner, FileIcon, Modal } from "@/components/ui";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
@@ -9,6 +8,7 @@ import { useToastStore, useUserStore } from "@/stores";
 import { type DocumentItem } from "@/modules/home/data";
 import { UploadFileModal } from "@/modules/home/modals";
 import { useAuth } from "@/hooks/useAuth";
+import { useRouterLoading } from "@/hooks/useRouterLoading";
 import { mapAttachmentToDocument } from "@/modules/home/mappers";
 import type { UserProfile } from "@/stores/user-store";
 
@@ -25,7 +25,7 @@ export function FolderPageClient({
   initialUser,
   defaultPageSize = 100,
 }: FolderPageClientProps) {
-  const router = useRouter();
+  const router = useRouterLoading();
   const { user, isLoading: isAuthLoading } = useAuth();
   const setUser = useUserStore((state) => state.setUser);
   const addToast = useToastStore((state) => state.addToast);
@@ -248,7 +248,7 @@ export function FolderPageClient({
                     type="button"
                     onClick={(e) => handleDeleteClick(e, item)}
                     disabled={deletingId === item.id}
-                    className="ml-1 size-8 inline-flex justify-center items-center rounded-lg text-neutral-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 dark:hover:text-red-400 transition-colors disabled:opacity-50"
+                    className="ml-1 size-8 inline-flex justify-center items-center rounded-lg text-red-500 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20 dark:hover:text-red-300 transition-colors disabled:opacity-50"
                     aria-label="Delete"
                   >
                     {deletingId === item.id ? (

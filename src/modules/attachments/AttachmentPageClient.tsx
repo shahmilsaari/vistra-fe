@@ -15,6 +15,7 @@ import {
   type AttachmentDetail,
 } from "@/services/api";
 import { RemarkModal } from "@/modules/home/modals";
+import { EditAttachmentModal } from "@/modules/attachments/modals";
 import { useToastStore, useUserStore } from "@/stores";
 import { useAuth } from "@/hooks/useAuth";
 import type { UserProfile } from "@/stores/user-store";
@@ -79,6 +80,7 @@ export function AttachmentPageClient({ attachmentId, initialDetail, initialUser 
   const [remarksRefreshKey, setRemarksRefreshKey] = useState(0);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
   const hasSeededUser = useRef(false);
   const hasLoadedOnce = useRef(Boolean(initialDetail));
 
@@ -208,6 +210,22 @@ export function AttachmentPageClient({ attachmentId, initialDetail, initialUser 
     }
   };
 
+  const handleEditSuccess = (updatedAttachment: AttachmentItem) => {
+    setAttachment(updatedAttachment);
+    // Optionally refresh the page or update URL if folder changed
+    const newFolder = typeof updatedAttachment.path === "string"
+      ? updatedAttachment.path
+      : updatedAttachment.path?.name ?? "";
+    const oldFolder = typeof attachment?.path === "string"
+      ? attachment.path
+      : attachment?.path?.name ?? "";
+
+    if (newFolder !== oldFolder) {
+      // Folder changed, might want to refresh or redirect
+      router.refresh();
+    }
+  };
+
   if (isAuthLoading) {
     return null;
   }
@@ -243,6 +261,16 @@ export function AttachmentPageClient({ attachmentId, initialDetail, initialUser 
 
   return (
     <AppLayout breadcrumb={<Breadcrumb items={breadcrumbItems} />}>
+      {/* Edit Attachment Modal */}
+      {attachment && (
+        <EditAttachmentModal
+          attachment={attachment}
+          isOpen={showEditModal}
+          onClose={() => setShowEditModal(false)}
+          onSuccess={handleEditSuccess}
+        />
+      )}
+
       {/* Delete Confirmation Modal */}
       <Modal
         isOpen={showDeleteModal}
@@ -318,6 +346,16 @@ export function AttachmentPageClient({ attachmentId, initialDetail, initialUser 
                     Download
                     <svg className="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                    </svg>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowEditModal(true)}
+                    className="inline-flex items-center gap-1.5 text-neutral-600 hover:text-neutral-700 dark:text-neutral-400 dark:hover:text-neutral-300 font-medium"
+                  >
+                    Edit
+                    <svg className="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                     </svg>
                   </button>
                   <button

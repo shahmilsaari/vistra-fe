@@ -409,6 +409,21 @@ export async function deleteAttachment(id: number): Promise<void> {
   });
 }
 
+export interface UpdateAttachmentPayload {
+  name?: string;
+  folder?: string;
+}
+
+export async function updateAttachment(id: number, payload: UpdateAttachmentPayload): Promise<AttachmentItem> {
+  return request<AttachmentItem>(`/attachments/${id}`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
+}
+
 export interface AttachmentLog {
   id: number;
   action: string;

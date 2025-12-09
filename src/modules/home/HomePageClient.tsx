@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState, useRef } from "react";
 import { DataTable, Modal } from "@/components/ui";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
@@ -10,6 +9,7 @@ import { useToastStore, useUIStore, useUserStore, useTableStore } from "@/stores
 import { documentColumns, type DocumentItem } from "@/modules/home/data";
 import { CreateFolderModal, UploadFileModal, RemarkModal } from "@/modules/home/modals";
 import { useAuth } from "@/hooks/useAuth";
+import { useRouterLoading } from "@/hooks/useRouterLoading";
 import { ConversationIcon } from "@/modules/home/modals/RemarkModal";
 import { mapAttachmentToDocument, mapDirectoryToDocument } from "./mappers";
 import type { UserProfile } from "@/stores/user-store";
@@ -31,7 +31,7 @@ export function HomePageClient({
   defaultSortOrder = "desc",
   defaultPageSize = 25,
 }: HomePageClientProps) {
-  const router = useRouter();
+  const router = useRouterLoading();
   const { user, isLoading: isAuthLoading } = useAuth();
   const { isTableLoading } = useUIStore();
   const setUser = useUserStore((state) => state.setUser);
@@ -45,6 +45,8 @@ export function HomePageClient({
   const [deletingAttachmentId, setDeletingAttachmentId] = useState<number | null>(null);
   const [itemToDelete, setItemToDelete] = useState<DocumentItem | null>(null);
   const [showUploadModal, setShowUploadModal] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const showSkeleton = isFetchingAttachments && tableData.length === 0;
   const hasHydratedUser = useRef(false);
   const hasLoadedOnce = useRef(false);
@@ -65,6 +67,7 @@ export function HomePageClient({
           limit: pageSize,
           sortBy: sortField,
           sortOrder,
+          search: debouncedSearch || undefined,
         });
 
         const directoryRows = (payload.directories ?? []).map(mapDirectoryToDocument);
@@ -83,7 +86,7 @@ export function HomePageClient({
         setIsFetchingAttachments(false);
       }
     },
-    [addToast, sortField, sortOrder, pageSize]
+    [addToast, sortField, sortOrder, pageSize, debouncedSearch]
   );
 
   useEffect(() => {
@@ -101,7 +104,15 @@ export function HomePageClient({
     const controller = new AbortController();
     loadAttachments(controller.signal);
     return () => controller.abort();
-  }, [pageSize, sortField, sortOrder, loadAttachments, isAuthLoading, user]);
+  }, [pageSize, sortField, sortOrder, debouncedSearch, loadAttachments, isAuthLoading, user]);
+
+  // Debounce search input
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
 
   const handleDeleteItem = useCallback(
     async (item: DocumentItem) => {
@@ -212,6 +223,8 @@ export function HomePageClient({
               columns={documentColumns}
               selectable={false}
               getRowId={(row) => row.id}
+              searchTerm={searchQuery}
+              onSearchChange={setSearchQuery}
               renderActions={(row) => (
                 <div className="flex items-center justify-end gap-2">
                   {row.kind === "folder" ? (

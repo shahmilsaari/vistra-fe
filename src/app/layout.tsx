@@ -3,6 +3,7 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { ToastContainer } from "@/components/ui/common/Toast";
 import { AuthProvider } from "@/components/AuthProvider";
+import { LoadingBar } from "@/components/LoadingBar";
 
 export const metadata: Metadata = {
   title: "Vistra",
@@ -19,6 +20,7 @@ export default function RootLayout({
       <body className="font-sans antialiased">
         <ThemeProvider>
           <AuthProvider>
+            <LoadingBar />
             <ToastContainer />
             {children}
           </AuthProvider>

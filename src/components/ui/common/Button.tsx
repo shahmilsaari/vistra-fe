@@ -3,8 +3,8 @@
 import type { ButtonHTMLAttributes, ReactNode } from "react";
 import { Spinner } from "./Spinner";
 
-type Variant = "primary" | "secondary" | "outline" | "ghost";
-type Size = "sm" | "md" | "lg";
+type Variant = "primary" | "secondary" | "outline" | "ghost" | "soft" | "white" | "link";
+type Size = "sm" | "md" | "lg" | "xs";
 
 export type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   variant?: Variant;
@@ -19,24 +19,34 @@ export type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   hideDefaultIcon?: boolean;
 };
 
+// Preline-inspired base classes
 const baseClasses =
-  "inline-flex items-center justify-center gap-x-2 rounded-lg font-medium focus:outline-hidden focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent disabled:cursor-not-allowed transition-all duration-200";
+  "inline-flex items-center justify-center gap-x-2 rounded-lg font-semibold border border-transparent focus:outline-none disabled:opacity-50 disabled:pointer-events-none transition-all";
 
+// Preline-inspired variant classes
 const variantClasses: Record<Variant, string> = {
   primary:
-    "bg-blue-600 text-white shadow-2xs hover:bg-blue-500 focus-visible:ring-blue-600 dark:bg-blue-500 dark:hover:bg-blue-400",
+    "bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:bg-blue-700 dark:focus:bg-blue-700",
   secondary:
-    "bg-transparent text-white/80 border border-white/10 hover:bg-white/10 focus-visible:ring-white/40 dark:text-neutral-200",
+    "bg-neutral-800 text-white hover:bg-neutral-900 focus:outline-none focus:bg-neutral-900 dark:bg-neutral-900 dark:hover:bg-neutral-800 dark:focus:bg-neutral-800",
   outline:
-    "border border-gray-200 text-gray-900 hover:bg-gray-50 focus-visible:ring-gray-200 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-800",
+    "border-gray-200 text-gray-800 hover:bg-gray-50 focus:outline-none focus:bg-gray-50 dark:border-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-800 dark:focus:bg-neutral-800",
   ghost:
-    "text-gray-600 hover:bg-gray-100 focus-visible:ring-gray-200 dark:text-neutral-300 dark:hover:bg-neutral-800 dark:focus-visible:ring-neutral-700",
+    "text-gray-800 hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus:bg-gray-100 dark:text-neutral-200 dark:hover:bg-neutral-800 dark:hover:text-neutral-100 dark:focus:bg-neutral-800",
+  soft:
+    "bg-blue-100 text-blue-800 hover:bg-blue-200 focus:outline-none focus:bg-blue-200 dark:bg-blue-800/30 dark:text-blue-400 dark:hover:bg-blue-800/50 dark:focus:bg-blue-800/50",
+  white:
+    "bg-white border-gray-200 text-gray-800 hover:bg-gray-50 focus:outline-none focus:bg-gray-50 dark:bg-neutral-900 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-800 dark:focus:bg-neutral-800",
+  link:
+    "border-transparent text-blue-600 hover:text-blue-700 hover:underline focus:outline-none focus:underline dark:text-blue-500 dark:hover:text-blue-400",
 };
 
+// Preline-inspired size classes
 const sizeClasses: Record<Size, string> = {
-  sm: "px-3 py-1.5 text-sm",
-  md: "px-4 py-2 text-sm",
-  lg: "px-5 py-2.5 text-base",
+  xs: "px-2.5 py-1.5 text-xs",
+  sm: "px-3 py-2 text-sm",
+  md: "px-4 py-3 text-sm",
+  lg: "px-4 py-3 text-base sm:px-5",
 };
 
 export function Button({

@@ -78,27 +78,27 @@ export function FileUpload({ files, onUpdateFiles, label, options }: FileUploadP
         </div>
       )}
 
-      <div className="relative rounded-[24px] border border-transparent bg-gradient-to-br from-white to-slate-50 p-[2px] shadow-[0_20px_35px_rgba(15,23,42,0.08)] dark:from-slate-900 dark:to-slate-950">
-        <div className="rounded-[22px] bg-white shadow-[inset_0_1px_0_rgba(255,255,255,0.4)] dark:bg-neutral-900 dark:ring-1 dark:ring-white/10">
+      <div className="relative rounded-[24px] border border-transparent bg-gradient-to-br from-white to-slate-50 p-[2px] shadow-[0_20px_35px_rgba(15,23,42,0.08)] dark:from-neutral-800 dark:to-neutral-900">
+        <div className="rounded-[22px] bg-white shadow-[inset_0_1px_0_rgba(255,255,255,0.4)] dark:bg-neutral-800 dark:shadow-none">
 
           {/* Header Section */}
-          <div className="border-b border-slate-100 p-6 dark:border-neutral-800">
+          <div className="border-b border-slate-100 p-6 dark:border-neutral-700">
             <div className="flex items-start justify-between">
               <div className="flex-1">
-                <h3 className="mb-2 text-lg font-semibold text-slate-800 dark:text-neutral-100">
+                <h3 className="mb-2 text-lg font-semibold text-slate-800 dark:text-white">
                   Drag & drop files or browse
                 </h3>
-                <p className="text-sm text-slate-500 dark:text-neutral-400">
+                <p className="text-sm text-slate-500 dark:text-neutral-300">
                   Supported formats: any · Max 5MB per file
                 </p>
               </div>
 
               {files.length > 0 && (
-                <div className="ml-4 rounded-xl border border-slate-200 bg-slate-50 px-4 py-2 text-right dark:border-neutral-700 dark:bg-neutral-800/50">
-                  <div className="text-2xl font-bold text-slate-800 dark:text-neutral-100">
+                <div className="ml-4 rounded-xl border border-slate-200 bg-slate-50 px-4 py-2 text-right dark:border-neutral-600 dark:bg-neutral-700">
+                  <div className="text-2xl font-bold text-slate-800 dark:text-white">
                     {files.length}
                   </div>
-                  <div className="text-xs text-slate-500 dark:text-neutral-400">
+                  <div className="text-xs text-slate-500 dark:text-neutral-300">
                     {files.length === 1 ? "file" : "files"}
                   </div>
                 </div>
@@ -108,8 +108,8 @@ export function FileUpload({ files, onUpdateFiles, label, options }: FileUploadP
 
           {/* Upload Area */}
           <div className="p-6">
-            <div className="relative rounded-[20px] border-2 border-dashed border-slate-200 bg-gradient-to-br from-blue-50/30 via-white/50 to-slate-50/30 p-8 transition-all hover:border-blue-300 hover:bg-blue-50/40 dark:border-neutral-700 dark:from-blue-950/20 dark:via-neutral-900/60 dark:to-neutral-950/30 dark:hover:border-blue-600">
-              <div className="absolute inset-0 pointer-events-none rounded-[20px] bg-gradient-to-br from-blue-100/20 to-transparent opacity-60"></div>
+            <div className="relative rounded-[20px] border-2 border-dashed border-slate-200 bg-gradient-to-br from-blue-50/30 via-white/50 to-slate-50/30 p-8 transition-all hover:border-blue-300 hover:bg-blue-50/40 dark:border-neutral-600 dark:from-neutral-700/50 dark:via-neutral-800/50 dark:to-neutral-900/50 dark:hover:border-blue-500">
+              <div className="absolute inset-0 pointer-events-none rounded-[20px] bg-gradient-to-br from-blue-100/20 to-transparent opacity-60 dark:from-blue-500/10 dark:opacity-30"></div>
 
               <div className="relative">
                 <FilePond
@@ -153,12 +153,12 @@ export function FileUpload({ files, onUpdateFiles, label, options }: FileUploadP
 
           {/* Files List Section */}
           {files.length > 0 && (
-            <div className="border-t border-slate-100 p-6 dark:border-neutral-800">
+            <div className="border-t border-slate-100 p-6 dark:border-neutral-700">
               <div className="mb-4 flex items-center justify-between">
-                <h4 className="text-sm font-semibold text-slate-700 dark:text-neutral-200">
+                <h4 className="text-sm font-semibold text-slate-700 dark:text-white">
                   Uploaded Files
                 </h4>
-                <div className="rounded-lg bg-blue-50 px-3 py-1 text-xs font-medium text-blue-700 dark:bg-blue-950/50 dark:text-blue-300">
+                <div className="rounded-lg bg-blue-50 px-3 py-1 text-xs font-medium text-blue-700 dark:bg-blue-500/20 dark:text-blue-300">
                   Total: {totalLabel}
                 </div>
               </div>
@@ -170,7 +170,7 @@ export function FileUpload({ files, onUpdateFiles, label, options }: FileUploadP
                   return (
                     <div
                       key={`${name}-${size}-${index}`}
-                      className="group flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-3 shadow-sm transition-all hover:border-blue-200 hover:shadow-md dark:border-neutral-800 dark:bg-neutral-950 dark:hover:border-blue-900"
+                      className="group flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-3 shadow-sm transition-all hover:border-blue-200 hover:shadow-md dark:border-neutral-600 dark:bg-neutral-700 dark:hover:border-blue-500"
                     >
                       {/* File Icon */}
                       <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-sm dark:from-blue-600 dark:to-blue-700">
@@ -181,16 +181,16 @@ export function FileUpload({ files, onUpdateFiles, label, options }: FileUploadP
 
                       {/* File Info */}
                       <div className="min-w-0 flex-1">
-                        <div className="truncate text-sm font-medium text-slate-700 dark:text-neutral-100">
+                        <div className="truncate text-sm font-medium text-slate-700 dark:text-white">
                           {name}
                         </div>
-                        <div className="mt-0.5 text-xs text-slate-400 dark:text-neutral-500">
+                        <div className="mt-0.5 text-xs text-slate-400 dark:text-neutral-300">
                           {formatBytes(size)}
                         </div>
                       </div>
 
                       {/* Status Badge */}
-                      <div className="shrink-0 rounded-full bg-green-50 px-2.5 py-1 text-xs font-medium text-green-700 dark:bg-green-950/50 dark:text-green-400">
+                      <div className="shrink-0 rounded-full bg-green-50 px-2.5 py-1 text-xs font-medium text-green-700 dark:bg-green-500/20 dark:text-green-300">
                         Ready
                       </div>
                     </div>

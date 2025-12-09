@@ -30,6 +30,8 @@ export type DataTableProps<T extends Record<string, unknown>> = {
   onSortChange?: (sortField: string, sortOrder: "asc" | "desc") => void;
   pageSize?: number;
   onPageSizeChange?: (pageSize: number) => void;
+  searchTerm?: string;
+  onSearchChange?: (search: string) => void;
 };
 
 /**
@@ -55,6 +57,8 @@ export function DataTable<T extends Record<string, unknown>>({
   onSortChange,
   pageSize,
   onPageSizeChange,
+  searchTerm: externalSearchTerm,
+  onSearchChange,
 }: DataTableProps<T>) {
   const generatedId = useId().replace(/:/g, "");
   const tableId = id ?? `hs-datatable-${generatedId}`;
@@ -94,7 +98,8 @@ export function DataTable<T extends Record<string, unknown>>({
   const normalizedSearchKeys =
     searchKeys ?? (columns.map((column) => column.key) as (keyof T)[]);
 
-  const [searchTerm, setSearchTerm] = useState("");
+  const [internalSearchTerm, setInternalSearchTerm] = useState("");
+  const searchTerm = externalSearchTerm ?? internalSearchTerm;
   const [currentPageSize, setCurrentPageSize] = useState(pageSize ?? pageSizeOptions[0] ?? 10);
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -172,7 +177,11 @@ export function DataTable<T extends Record<string, unknown>>({
   );
 
   const handleSearch = (value: string) => {
-    setSearchTerm(value);
+    if (onSearchChange) {
+      onSearchChange(value);
+    } else {
+      setInternalSearchTerm(value);
+    }
     setCurrentPage(1);
   };
 
@@ -297,7 +306,7 @@ export function DataTable<T extends Record<string, unknown>>({
                   <th
                     key={columnSortField}
                     scope="col"
-                    className="py-3 px-6 text-left text-xs font-medium uppercase tracking-wider text-neutral-500 dark:text-neutral-400"
+                    className="py-2.5 px-4 text-left text-xs font-medium uppercase tracking-wider text-neutral-500 dark:text-neutral-400"
                     aria-sort={
                       isActiveSort ? (activeOrder === "desc" ? "descending" : "ascending") : undefined
                     }
@@ -329,7 +338,7 @@ export function DataTable<T extends Record<string, unknown>>({
                 );
               })}
               {renderActions && (
-                <th className="py-3 px-6 text-right text-xs font-medium uppercase tracking-wider text-neutral-500 dark:text-neutral-400">
+                <th className="py-2.5 px-4 text-right text-xs font-medium uppercase tracking-wider text-neutral-500 dark:text-neutral-400">
                   Action
                 </th>
               )}
@@ -344,20 +353,20 @@ export function DataTable<T extends Record<string, unknown>>({
                   className="animate-pulse"
                 >
                   {selectable && (
-                    <td className="py-4 ps-6 pe-3">
+                    <td className="py-2.5 ps-4 pe-3">
                       <div className="h-4 w-4 rounded bg-neutral-200 dark:bg-neutral-800"></div>
                     </td>
                   )}
                   {visibleColumns.map((column) => (
                     <td
                       key={`${tableId}-skeleton-${index}-${String(column.key)}`}
-                      className="py-4 px-6"
+                      className="py-2.5 px-4"
                     >
                       <div className="h-4 rounded bg-neutral-200 dark:bg-neutral-800 w-3/4"></div>
                     </td>
                   ))}
                   {renderActions && (
-                    <td className="py-4 px-6">
+                    <td className="py-2.5 px-4">
                       <div className="h-4 rounded bg-neutral-200 dark:bg-neutral-800 w-1/2 ms-auto"></div>
                     </td>
                   )}
@@ -388,7 +397,7 @@ export function DataTable<T extends Record<string, unknown>>({
                     className="group transition-all hover:bg-gradient-to-r hover:from-violet-50/50 hover:to-indigo-50/30 dark:hover:from-violet-900/10 dark:hover:to-indigo-900/10"
                   >
                     {selectable && (
-                      <td className="py-4 ps-6 pe-3">
+                      <td className="py-2.5 ps-4 pe-3">
                         <div className="flex items-center h-5">
                           <input
                             id={checkboxId}
@@ -404,13 +413,13 @@ export function DataTable<T extends Record<string, unknown>>({
                     {visibleColumns.map((column) => (
                       <td
                         key={`${rowKey}-${String(column.key)}`}
-                        className={`py-4 px-6 text-sm text-neutral-600 dark:text-neutral-300 ${column.className ?? ""}`}
+                        className={`py-2.5 px-4 text-sm text-neutral-600 dark:text-neutral-300 ${column.className ?? ""}`}
                       >
                         {column.render ? column.render(row) : (row[column.key] as ReactNode)}
                       </td>
                     ))}
                     {renderActions && (
-                      <td className="py-4 px-6 text-right text-sm font-medium">
+                      <td className="py-2.5 px-4 text-right text-sm font-medium">
                         {renderActions(row)}
                       </td>
                     )}
